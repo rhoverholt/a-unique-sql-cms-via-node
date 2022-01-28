@@ -21,7 +21,7 @@ class Role {
     }
 
     static selectAll(callback) {
-        return db.query("SELECT * FROM role", callback)
+        return db.query("SELECT r.id as role_id, r.title, r.salary, r.department_id, d.name as department_name FROM role as r LEFT JOIN department as d ON r.department_id = d.id", callback)
     }
 
     static create(callback) {
@@ -46,11 +46,22 @@ class Role {
             }       
     ])
         .then(({title, salary, department_id}) => {
-            console.log(`INSERT INTO role (title, salary, department_id) VALUES ('${title}',${salary},${department_id})`)
+            // console.log(`INSERT INTO role (title, salary, department_id) VALUES ('${title}',${salary},${department_id})`)
             db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${title}',${salary},${department_id})`, callback);
         })
     }
 
+    static delete(callback) {
+        return Inquirer.prompt([{
+            type: "input", 
+            name: "id", 
+            message: "What is the ID of the role", 
+            validate: isNullableIntValidator
+        }])
+        .then(({id}) => {
+            db.query(`DELETE FROM role WHERE id = ${id}`, callback);
+        })
+    }
 }
 
 module.exports = Role;
