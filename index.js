@@ -54,7 +54,7 @@ function handleDbUpdate(err, result) {
 }
 
 function handleDbDelete(err, result) {
-    handleDbResponse(err, (result.affectedRows !== undefined) ? `${result.affectedRows} record${(result.affectedRows) ? 's' : ''} deleted.` : result)
+    handleDbResponse(err, (result.affectedRows !== undefined) ? `\n${result.affectedRows} record${(result.affectedRows) ? 's' : ''} deleted.\n` : result)
 }
 
 // This method prompts the user for the next employee and ends when all employees have been entered.

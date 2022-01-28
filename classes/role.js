@@ -6,7 +6,7 @@ const nonEmptyValidator = (answer) => {
 }
 
 const isNullableDecimalValidator = (decimal) => ((isNullableIntValidator(decimal))
-    || (decimal.match(/^[-+]?[0-9]+\.[0-9]+$/)) 
+    || (decimal.match(/[\d,]*(\.\d{2})?/))  //(decimal.match(/^[-+]?[0-9]+\.[0-9]+$/)) 
     || (!isNaN(value) && parseInt(Number(value)) == value && !isNaN(parseInt(value, 10))))
 
 const isNullableIntValidator = (number) => ((number === null)
@@ -25,42 +25,71 @@ class Role {
     }
 
     static create(callback) {
-        return Inquirer.prompt([
-            {
-                type: "input", 
-                name: "title", 
-                message: "What is the title of the role", 
-                validate: nonEmptyValidator
-            },
-            {
-                type: "input", 
-                name: "salary", 
-                message: "What is the salary of the role", 
-                validate: isNullableDecimalValidator
-            },
-            {
-                type: "input", 
-                name: "department_id", 
-                message: "What is the id of the role's department", 
-                validate: isNullableIntValidator
-            }       
-    ])
-        .then(({title, salary, department_id}) => {
-            // console.log(`INSERT INTO role (title, salary, department_id) VALUES ('${title}',${salary},${department_id})`)
-            db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${title}',${salary},${department_id})`, callback);
-        })
+
+        db.query('SELECT id, name FROM department', createWithDepartments)
+
+        function createWithDepartments(err, result) {
+            let departments = [];
+
+            if (err || !result.length) {
+                console.log("DB Error: " + err)
+                process.exit(0);
+            }
+
+            result.forEach(element => departments.push(`ID: ${element.id} Department: ${element.name}`));            
+
+            return Inquirer.prompt([
+                {
+                    type: "input", 
+                    name: "title", 
+                    message: "What is the title of the role", 
+                    validate: nonEmptyValidator
+                },
+                {
+                    type: "input", 
+                    name: "salary", 
+                    message: "What is the salary of the role", 
+                    validate: isNullableDecimalValidator
+                },
+                {
+                    type: "list", 
+                    name: "department", 
+                    message: "What is the role's department",
+                    choices: departments
+                }       
+            ])
+            .then(({title, salary, department}) => {
+                // console.log(`INSERT INTO role (title, salary, department_id) VALUES ('${title}',${salary},${department_id})`)
+                let department_id = department.split(" ")[1]
+                db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${title}',${salary},${department_id})`, callback);
+            })
+        }
     }
 
     static delete(callback) {
-        return Inquirer.prompt([{
-            type: "input", 
-            name: "id", 
-            message: "What is the ID of the role", 
-            validate: isNullableIntValidator
-        }])
-        .then(({id}) => {
-            db.query(`DELETE FROM role WHERE id = ${id}`, callback);
-        })
+
+        db.query("SELECT id, title, salary FROM role ORDER BY title, id", delWithRoles);
+
+        function delWithRoles(err, result) {
+
+            if (err) {console.log("DB Error " + err); process.exit(0)}
+            
+            let roles = [];
+            result.forEach((role) => roles.push(`ID: ${role.id} TITLE: ${role.title} SALARY: ${role.salary}`));
+            roles.push("Oops, I don't want to delete anyone");
+
+            return Inquirer.prompt([{
+                type: "list", 
+                name: "role", 
+                message: "Which role should be deleted", 
+                choices: roles
+            }])
+            .then(({role}) => {
+                let id = role.split(' ')[1];
+                id = (id === "I") ? null : id;
+                db.query(`DELETE FROM role WHERE id = ${id}`, callback);
+            })
+        }
     }
 }
 
