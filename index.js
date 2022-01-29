@@ -46,11 +46,11 @@ function handleDbResponse(err, msg) {
 }
 
 function handleDbCreate(err, result) {
-    handleDbResponse(err, (result.affectedRows !== undefined) ? `${result.affectedRows} record${(result.affectedRows) ? 's' : ''} created.` : result)
+    handleDbResponse(err, (result.affectedRows !== undefined) ? `\n${result.affectedRows} record${(result.affectedRows) ? 's' : ''} created.\n` : result)
 }
 
 function handleDbUpdate(err, result) {
-    handleDbResponse(err, (result.affectedRows !== undefined) ? `${result.affectedRows} record${(result.affectedRows) ? 's' : ''} updated.` : result)
+    handleDbResponse(err, (result.affectedRows !== undefined) ? `\n${result.affectedRows} record${(result.affectedRows) ? 's' : ''} updated.\n` : result)
 }
 
 function handleDbDelete(err, result) {

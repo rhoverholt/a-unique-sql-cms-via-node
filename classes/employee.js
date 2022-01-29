@@ -88,12 +88,8 @@ class Employee {
             ])
                 .then(({firstName, lastName, role, manager}) => {
 
-                    console.log(role);
-
                     let role_id = (role === "Leave it blank") ? null : role.split(' ')[1];
                     let manager_id = (manager === "Leave it blank") ? null : manager.split(' ')[1];
-
-                    console.log(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${firstName}','${lastName}',${role_id},${manager_id})`);
 
                     db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${firstName}','${lastName}',${role_id},${manager_id})`, callback);
                 })
@@ -148,16 +144,10 @@ class Employee {
 
                 return Inquirer.prompt(prompt)
                         .then(({employee, role}) => {
-                            console.log (employee);
-                            console.log (role);
-
+                            
                             let employee_id = employee.split(" ")[1];
                             let role_id = role.split(" ")[1];
                             
-                            console.log (employee_id);
-                            console.log (role_id);
-                            console.log(`UPDATE employee SET role_id = ${role_id} WHERE id = ${employee_id}`);
-
                             db.query(`UPDATE employee SET role_id = ${role_id} WHERE id = ${employee_id}`, callback)
                         })
             }
